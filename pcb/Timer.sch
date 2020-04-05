@@ -580,23 +580,27 @@ by exp-lbrs.ulp</description>
 <package name="E2,5">
 <description>&lt;b&gt;ELECTROLYTIC CAPACITOR&lt;/b&gt;&lt;p&gt;
 grid 2.54 mm</description>
-<wire x1="-1.651" y1="1.27" x2="-1.397" y2="1.27" width="0.1524" layer="21"/>
-<wire x1="-1.397" y1="1.016" x2="-1.397" y2="1.27" width="0.1524" layer="21"/>
-<wire x1="-1.397" y1="1.27" x2="-1.143" y2="1.27" width="0.1524" layer="21"/>
-<wire x1="-1.397" y1="1.27" x2="-1.397" y2="1.524" width="0.1524" layer="21"/>
+<wire x1="-1.524" y1="1.27" x2="-1.27" y2="1.27" width="0.1524" layer="21"/>
+<wire x1="-1.27" y1="1.016" x2="-1.27" y2="1.27" width="0.1524" layer="21"/>
+<wire x1="-1.27" y1="1.27" x2="-1.016" y2="1.27" width="0.1524" layer="21"/>
+<wire x1="-1.27" y1="1.27" x2="-1.27" y2="1.524" width="0.1524" layer="21"/>
 <wire x1="-1.651" y1="0" x2="-0.762" y2="0" width="0.1524" layer="51"/>
 <wire x1="-0.762" y1="0" x2="-0.762" y2="-1.27" width="0.1524" layer="51"/>
 <wire x1="-0.762" y1="-1.27" x2="-0.254" y2="-1.27" width="0.1524" layer="51"/>
-<wire x1="-0.254" y1="-1.27" x2="-0.254" y2="1.27" width="0.1524" layer="21"/>
+<wire x1="-0.254" y1="-1.27" x2="-0.254" y2="0" width="0.1524" layer="21"/>
+<wire x1="-0.254" y1="0" x2="-0.254" y2="1.27" width="0.1524" layer="21"/>
 <wire x1="-0.254" y1="1.27" x2="-0.762" y2="1.27" width="0.1524" layer="51"/>
 <wire x1="-0.762" y1="1.27" x2="-0.762" y2="0" width="0.1524" layer="51"/>
 <wire x1="0.635" y1="0" x2="1.651" y2="0" width="0.1524" layer="51"/>
-<wire x1="0.254" y1="-1.27" x2="0.254" y2="1.27" width="0.1524" layer="21"/>
 <rectangle x1="0.254" y1="-1.3462" x2="0.762" y2="1.3462" layer="51"/>
 <pad name="+" x="-1.27" y="0" drill="0.8128" diameter="1.6002"/>
 <pad name="-" x="1.27" y="0" drill="0.8128" diameter="1.6002" shape="octagon"/>
 <text x="2.413" y="1.27" size="1.27" layer="25" ratio="10">&gt;NAME</text>
 <text x="2.413" y="-2.413" size="1.27" layer="27" ratio="10">&gt;VALUE</text>
+<wire x1="0.254" y1="-1.27" x2="0.254" y2="0" width="0.1524" layer="21"/>
+<wire x1="0.254" y1="0" x2="0.254" y2="1.27" width="0.1524" layer="21"/>
+<wire x1="-0.254" y1="0" x2="-0.34925" y2="0" width="0.1524" layer="21"/>
+<wire x1="0.254" y1="0" x2="0.34925" y2="0" width="0.1524" layer="21"/>
 </package>
 <package name="1X02/90">
 <description>&lt;b&gt;PIN HEADER&lt;/b&gt;</description>
@@ -1570,7 +1574,7 @@ Source: http://www.onsemi.co.jp .. LM137M-D.PDF</description>
 <part name="C3" library="Timer" deviceset="C-EU" device="C0805" value="22pF"/>
 <part name="GND7" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="L1" library="Timer" deviceset="L-EU" device="L0805" value="10uH"/>
-<part name="C6" library="Timer" deviceset="C-EU" device="C0805" value="100nF"/>
+<part name="C6" library="Timer" deviceset="C-EU" device="C0805" value="10uF"/>
 <part name="GND8" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="C9" library="Timer" deviceset="C-EU" device="C0805" value="10uF"/>
 <part name="C10" library="Timer" deviceset="CPOL-EU" device="E2.5" value="47uF"/>

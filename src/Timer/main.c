@@ -191,7 +191,7 @@ void check_pin_change()
 	sei();
 }
 
-inline void load_display()
+static inline void load_display()
 {
 	DISP_PORT |= (1<<DISP_LOAD);
 	DISP_PORT &= ~(1<<DISP_LOAD);

@@ -103,6 +103,8 @@ struct dcf
 	uint8_t cnt;
 };
 
+#define load_display() do { DISP_PORT |= (1<<DISP_LOAD); DISP_PORT &= ~(1<<DISP_LOAD); } while (0)
+
 static void check_dcf(struct dcf *dcf)
 {
 	cli();
@@ -189,12 +191,6 @@ static void check_pin_change()
 		TIFR1 = (1<<OCF1B);
 	}
 	sei();
-}
-
-static inline void load_display()
-{
-	DISP_PORT |= (1<<DISP_LOAD);
-	DISP_PORT &= ~(1<<DISP_LOAD);
 }
 
 /*

@@ -25,8 +25,6 @@ typedef __uint24 uint24_t;
 #define CHAR_MINUS	0x40
 #define CHAR_DOT	0x80
 
-extern const uint8_t font[10] PROGMEM;
-
 extern void display_time(uint24_t sec, uint8_t sync);
 extern void display_menu(struct menu *menu);
 

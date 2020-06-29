@@ -85,16 +85,16 @@
 
 #define UPDATE_DISP	0
 #define SYNC		1
-//volatile uint8_t flags;
+//static volatile uint8_t flags;
 #define flags		GPIOR0
 
-//volatile uint8_t ms_dcf;
+//static volatile uint8_t ms_dcf;
 #define ms_dcf		GPIOR1
-uint8_t data[59];
+static uint8_t data[59];
 
-volatile uint24_t seconds;
-volatile uint24_t last_sync;
-//volatile uint8_t sync_dot;
+static volatile uint24_t seconds;
+static volatile uint24_t last_sync;
+//static volatile uint8_t sync_dot;
 #define sync_dot	GPIOR2
 
 struct dcf
@@ -103,7 +103,7 @@ struct dcf
 	uint8_t cnt;
 };
 
-void check_dcf(struct dcf *dcf)
+static void check_dcf(struct dcf *dcf)
 {
 	cli();
 	uint8_t tim = ms_dcf;
@@ -175,7 +175,7 @@ void check_dcf(struct dcf *dcf)
 	}
 }
 
-void check_pin_change()
+static void check_pin_change()
 {
 	cli();
 	if (GIFR & (1<<PCIF0))

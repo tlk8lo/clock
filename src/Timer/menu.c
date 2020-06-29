@@ -1,6 +1,6 @@
 #include "menu.h"
 
-uint16_t digits_to_minutes(uint8_t *dig)
+static uint16_t digits_to_minutes(uint8_t *dig)
 {
 	uint8_t hours = dig[3] * 10 + dig[2];
 
@@ -9,7 +9,7 @@ uint16_t digits_to_minutes(uint8_t *dig)
 	return (uint16_t)hours * 60 + minutes;
 }
 
-void minutes_to_digits(uint8_t *dig, uint16_t min)
+static void minutes_to_digits(uint8_t *dig, uint16_t min)
 {
 	uint8_t minutes = min % 60;
 	dig[0] = minutes % 10;
@@ -20,7 +20,7 @@ void minutes_to_digits(uint8_t *dig, uint16_t min)
 	dig[3] = hours / 10;
 }
 
-uint8_t inc(uint8_t dig, uint8_t max)
+static uint8_t inc(uint8_t dig, uint8_t max)
 {
 	dig++;
 	if (dig > max)
@@ -28,7 +28,7 @@ uint8_t inc(uint8_t dig, uint8_t max)
 	return dig;
 }
 
-uint8_t dec(uint8_t dig, uint8_t max)
+static uint8_t dec(uint8_t dig, uint8_t max)
 {
 	dig--;
 	if (dig == 0xFF)
@@ -52,9 +52,7 @@ void btn_up(struct menu *menu)
 					write_lesson_start_end(menu->pos, min);
 				}
 				else
-				{
 					write_lesson_start_end(0, 8 * 60);
-				}
 			}
 		}
 		else
@@ -91,7 +89,7 @@ void btn_right(struct menu *menu)
 	else
 	{
 		if (menu->time_pos)
-		(menu->time_pos)--;
+			(menu->time_pos)--;
 		else
 		{
 			uint16_t min = digits_to_minutes(menu->dig);

@@ -1,6 +1,6 @@
 #include "display.h"
 
-const uint8_t font[] PROGMEM =
+static const uint8_t font[] PROGMEM =
 {
 	CHAR_0,
 	CHAR_1,
@@ -14,7 +14,7 @@ const uint8_t font[] PROGMEM =
 	CHAR_9
 };
 
-void send_byte(uint8_t data)
+static void send_byte(uint8_t data)
 {
 	USIDR = data;
 	USISR = (1<<USIOIF);
@@ -23,17 +23,17 @@ void send_byte(uint8_t data)
 	while (!(USISR & (1<<USIOIF)));
 }
 
-void send_num_dot(uint8_t data, uint8_t dot)
+static void send_num_dot(uint8_t data, uint8_t dot)
 {
 	send_byte(pgm_read_byte(font + data) | dot);
 }
 
-void send_num(uint8_t data)
+static void send_num(uint8_t data)
 {
 	send_num_dot(data, 0);
 }
 
-void display_time_difference(uint24_t sec, uint8_t sync)
+static void display_time_difference(uint24_t sec, uint8_t sync)
 {
 	// uint16_t min = sec / 60;
 	// Spared some bytes by using 16 bit division
@@ -110,7 +110,7 @@ void display_time_difference(uint24_t sec, uint8_t sync)
 		send_byte(0);
 }
 
-void display_time_no_sync()
+static void display_time_no_sync()
 {
 	send_byte(CHAR_MINUS);
 	send_byte(CHAR_MINUS);
@@ -126,7 +126,7 @@ void display_time(uint24_t sec, uint8_t sync)
 		display_time_no_sync();
 }
 
-void display_menu_pos(uint8_t pos)
+static void display_menu_pos(uint8_t pos)
 {
 	send_byte(CHAR_L);
 	send_byte(0);
@@ -134,7 +134,7 @@ void display_menu_pos(uint8_t pos)
 	send_num(pos / 10);
 }
 
-void display_menu_last()
+static void display_menu_last()
 {
 	send_byte(CHAR_T);
 	send_byte(CHAR_S);

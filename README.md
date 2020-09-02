@@ -4,6 +4,8 @@ A school timer which displays time to the end of lesson/break. Uses [DCF77](http
 
 Szkolny timer wyświetlający czas do końca lekcji/przerwy. Używa sygnału radiowego [DCF77](https://en.wikipedia.org/wiki/DCF77) do synchronizacji czasu. Może również pracować jako normalny zegar cyfrowy.
 
+![Timer](photos/timer4.jpg)
+
 ## Budowa
 
 Urządzenie składa się z mikrokontrolera AVR ATtiny24, modułu odbiornika sygnału DCF77 oraz 2 układów SCT2024 sterujących 4 dużymi wyświetlaczami 7-segmentowymi. Posiada 4 przyciski do konfiguracji godzin lekcyjnych (zapisywanych w pamięci EEPROM). Wymaga zasilania prądem stałym o napięciu **15V** i pobiera maksymalnie **1,2A**.
@@ -70,6 +72,7 @@ menu gł      └─────────┘       └───────�
 * [src](src) - kod źródłowy programu mikrokontrolera
 * [pcb](pcb) - schemat obwodu i projekt płytki PCB
 * [cad](cad) - modele elementów obudowy
+* [photos](photos) - zdjęcia gotowego urządzenia
 
 ## Licencja
 

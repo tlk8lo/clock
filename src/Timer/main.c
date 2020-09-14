@@ -1,6 +1,10 @@
 /*
 	A school timer which displays time to the end of lesson/break.
-*/ 
+	
+	Microcontroller: AVR ATtiny24A
+	Fuse bits: Low:0xFF High:0xD5 Ext:0xFF
+	Clock: 8 MHz Crystal
+*/
 
 #include <avr/io.h>
 #include <avr/interrupt.h>

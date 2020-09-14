@@ -8,7 +8,7 @@ Szkolny timer wyświetlający czas do końca lekcji/przerwy. Używa sygnału rad
 
 ## Budowa
 
-Urządzenie składa się z mikrokontrolera AVR ATtiny24, modułu odbiornika sygnału DCF77 oraz 2 układów SCT2024 sterujących 4 dużymi wyświetlaczami 7-segmentowymi. Posiada 4 przyciski do konfiguracji godzin lekcyjnych (zapisywanych w pamięci EEPROM). Wymaga zasilania prądem stałym o napięciu **15V** i pobiera maksymalnie **1,2A**.
+Urządzenie składa się z mikrokontrolera AVR ATtiny24A, modułu odbiornika sygnału DCF77 oraz 2 układów SCT2024 sterujących 4 dużymi wyświetlaczami 7-segmentowymi. Posiada 4 przyciski do konfiguracji godzin lekcyjnych (zapisywanych w pamięci EEPROM). Wymaga zasilania prądem stałym o napięciu **15V** i pobiera maksymalnie **1,2A**.
 
 ## Sposób działania
 

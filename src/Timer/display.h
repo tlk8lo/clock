@@ -2,7 +2,6 @@
 #define DISPLAY_H
 
 #include <avr/io.h>
-#include <avr/pgmspace.h>
 #include "lessons.h"
 #include "menu.h"
 
@@ -22,10 +21,9 @@ typedef __uint24 uint24_t;
 #define CHAR_A		0x77
 #define CHAR_S		0x6D
 #define CHAR_T		0x78
-#define CHAR_MINUS	0x40
 #define CHAR_DOT	0x80
 
 extern void display_time(uint24_t sec, uint8_t sync);
-extern void display_menu(struct menu *menu);
+extern void display_menu(enum page *page, struct menu *menu);
 
 #endif /* DISPLAY_H */

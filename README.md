@@ -8,28 +8,47 @@ Szkolny timer wyświetlający czas do końca lekcji/przerwy. Używa sygnału rad
 
 ## Budowa
 
-Urządzenie składa się z mikrokontrolera AVR ATtiny24A, modułu odbiornika sygnału DCF77 oraz 2 układów SCT2024 sterujących 4 dużymi wyświetlaczami 7-segmentowymi. Posiada 4 przyciski do konfiguracji godzin lekcyjnych (zapisywanych w pamięci EEPROM). Wymaga zasilania prądem stałym o napięciu **15V** i pobiera maksymalnie **1,2A**.
+Urządzenie składa się z mikrokontrolera AVR ATtiny24A, modułu odbiornika sygnału DCF77 oraz 2 układów SCT2024 sterujących 4 dużymi wyświetlaczami 7-segmentowymi. Posiada 4 przyciski do konfiguracji godzin lekcyjnych (zapisywanych w pamięci EEPROM). Wymaga zasilania prądem stałym o napięciu **15V** i pobiera maksymalnie **1,2A**. _Podczas montażu urządzenia, przewód zasilający należy poprowadzić jak najdalej od anteny, ponieważ powoduje on znaczne zakłócenia._
 
 ## Sposób działania
 
-Po włączeniu zasilania, urządzenie czeka na odebranie poprawnej ramki DCF77 w celu synchronizacji czasu. Po udanej synchronizacji, wyświetla:
-
-* Aktualną godzinę (jeżeli nie są zapisane żadne lekcje)
-* Czas do końca przerwy (jeżeli trwa przerwa)
-* Czas do końca lekcji (jeżeli trwa lekcja) - zapala się wtedy kropka po prawej stronie 4 cyfry
-
-Jeżeli urządzenie nie odebrało poprawnej ramki w ciągu ostatnich 24 godzin, gaśnie kropka pomiędzy 2 i 3 cyfrą. Mimo tego, urządzenie dalej działa na podstawie wcześniejszej synchronizacji.
-
-## Konfiguracja lekcji
-
-W celu konfiguracji godzin lekcyjnych, należy nacisnąć dowolny przycisk, aby wejść do menu głównego.\
-W menu, poszczególne przyciski umożliwiają nawigację, na zasadzie strzałek:
+Po włączeniu zasilania należy ustawić aktualną godzinę, używając przycisków, które działają na zasadzie strzałek:
 
 ```
   ↑  
 ←   →
   ↓  
 ```
+
+Kropka oznacza aktualnie edytowaną cyfrę.
+
+_Na poniższym przykładzie ustawiono godzinę 09:45._
+
+```
+               +                   +                   +                   +               
+               ↑                   ↑                   ↑                   ↑               
+             ┌─────────┐       ┌─────────┐       ┌─────────┐       ┌─────────┐             
+Gotowe   ←   │ 0.9 4 5 │   ↔   │ 0 9.4 5 │   ↔   │ 0 9 4.5 │   ↔   │ 0 9 4 5.│   →   Gotowe
+             └─────────┘       └─────────┘       └─────────┘       └─────────┘             
+               ↓                   ↓                   ↓                   ↓               
+               -                   -                   -                   -               
+```
+
+Po ustawieniu godziny, timer wyświetla:
+
+* Aktualną godzinę (jeżeli nie są zapisane żadne lekcje)
+* Czas do końca przerwy (jeżeli trwa przerwa)
+* Czas do końca lekcji (jeżeli trwa lekcja) - zapala się wtedy kropka po prawej stronie 4 cyfry
+
+Urządzenie korzysta z odbiornika sygnału DCF77 w celu synchronizacji czasu.\
+Kropka pomiędzy 2 i 3 cyfrą informuje o statusie synchronizacji:
+
+* Jeżeli odebrano poprawną ramkę w ciągu ostatnich 24 godzin - kropka świeci się
+* W przeciwnym razie - kropka odzwierciedla stan odbiornika DCF77 (pozwala to wizualnie ocenić jakość odbieranego sygnału)
+
+## Konfiguracja lekcji
+
+W celu konfiguracji godzin lekcyjnych, należy nacisnąć dowolny przycisk, aby wejść do menu głównego.
 
 **Menu główne**
 

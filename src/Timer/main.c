@@ -87,8 +87,10 @@
 #define DCF_OVF_VAL	90
 #define DCF_RES_VAL	10
 
-#define UPDATE_DISP	0
-#define SYNC		1
+#define TIME_VALID	0
+#define UPDATE_MENU	1
+#define UPDATE_TIME	2
+#define DCF_SYNC	3
 //static volatile uint8_t flags;
 #define flags		GPIOR0
 
@@ -109,6 +111,26 @@ struct dcf
 
 #define load_display() do { DISP_PORT |= (1<<DISP_LOAD); DISP_PORT &= ~(1<<DISP_LOAD); } while (0)
 
+static void set_time(uint16_t min)
+{
+	min *= 30;
+	uint24_t s = (uint24_t)min << 1;
+
+	if (!(TIMSK1 & (1<<OCIE1A)))
+	{
+		GTCCR = (1<<PSR10);
+		uint16_t ocr = TCNT1 - 1;
+		if (ocr == 0xFFFF)
+			ocr = SEC_OCR_VAL - 1;
+		OCR1A = ocr;
+		TIFR1 = (1<<OCF1A);
+		TIMSK1 |= (1<<OCIE1A);
+	}
+
+	seconds = s;
+	flags |= (1<<TIME_VALID);
+}
+
 static void check_dcf(struct dcf *dcf)
 {
 	cli();
@@ -123,18 +145,17 @@ static void check_dcf(struct dcf *dcf)
 			uint24_t s = dcf_parse(data);
 			
 			cli();
-			uint16_t cnt = TCNT1;
 			GTCCR = (1<<PSR10);
-			if (cnt >= SEC_OCR_VAL - (SEC_RES_VAL - 1))
-				OCR1A = cnt + (SEC_RES_VAL - 1) - SEC_OCR_VAL;
+			uint16_t tcnt = TCNT1;
+			if (tcnt >= SEC_OCR_VAL - (SEC_RES_VAL - 1))
+				OCR1A = tcnt + (SEC_RES_VAL - 1) - SEC_OCR_VAL;
 			else
-				OCR1A = cnt + (SEC_RES_VAL - 1);
+				OCR1A = tcnt + (SEC_RES_VAL - 1);
 			TIFR1 = (1<<OCF1A);
+			TIMSK1 |= (1<<OCIE1A);
 
 			last_sync = s;
-			sync_dot = CHAR_DOT;
-			flags |= (1<<SYNC);
-			TIMSK1 = (1<<OCIE1A);
+			flags |= (1<<DCF_SYNC);
 		}
 
 		dcf->cnt = 0;
@@ -178,6 +199,8 @@ static void check_dcf(struct dcf *dcf)
 		}
 		
 		dcf->state = new_state;
+		if (!(sync_dot & CHAR_DOT))
+			flags |= (1<<UPDATE_TIME);
 	}
 }
 
@@ -187,11 +210,11 @@ static void check_pin_change()
 	if (GIFR & (1<<PCIF0))
 	{
 		GIFR = (1<<PCIF0);
-		uint16_t cnt = TCNT1;
-		if (cnt >= SEC_OCR_VAL - (BTN_DEB_VAL - 1))
-			OCR1B = cnt + (BTN_DEB_VAL - 1) - SEC_OCR_VAL;
+		uint16_t tcnt = TCNT1;
+		if (tcnt >= SEC_OCR_VAL - (BTN_DEB_VAL - 1))
+			OCR1B = tcnt + (BTN_DEB_VAL - 1) - SEC_OCR_VAL;
 		else
-			OCR1B = cnt + (BTN_DEB_VAL - 1);
+			OCR1B = tcnt + (BTN_DEB_VAL - 1);
 		TIFR1 = (1<<OCF1B);
 	}
 	sei();
@@ -217,16 +240,18 @@ ISR(TIM1_COMPA_vect)
 		s = 0;
 
 	uint24_t l = last_sync;
-	if (flags & (1<<SYNC))
+	if (flags & (1<<DCF_SYNC))
 	{
-		flags &= ~(1<<SYNC);
+		flags &= ~(1<<DCF_SYNC);
+		sync_dot |= CHAR_DOT;
 		s = l;
 	}
 	else if (s == l)
-		sync_dot = 0;
+		sync_dot &= ~CHAR_DOT;
 	
 	seconds = s;
-	flags |= (1<<UPDATE_DISP);
+	flags |= (1<<TIME_VALID);
+	flags |= (1<<UPDATE_TIME);
 }
 
 int main(void)
@@ -253,18 +278,19 @@ int main(void)
 	// Timer 1 config - CTC, prescaler = 256
 	ICR1 = SEC_OCR_VAL - 1;
 	TCCR1B = (1<<WGM13) | (1<<WGM12) | (1<<CS12);
-
-	flags |= (1<<UPDATE_DISP);
+	
+	enum page page = INIT;
+	flags |= (1<<UPDATE_MENU);
 
 	uint8_t old = BTN_PIN;
 	struct dcf dcf = { old & (1<<DCF_BIT) };
-	
+
 	// Main loop
 	while (1)
 	{
 		sei();
-		struct menu menu = { 0 };
-		
+		struct menu menu = { 3 };
+
 		do
 		{
 			check_dcf(&dcf);
@@ -275,41 +301,52 @@ int main(void)
 				uint8_t new = BTN_PIN;
 				uint8_t btn = old & ~new;
 				old = new;
-				
+
 				if (btn & BTN_MASK)
 				{
-					if (menu.page == NONE)
-					{
-						menu.page = MAIN;
-						flags |= (1<<UPDATE_DISP);
-					}
-					else if (btn & (1<<BTN_U))
-						btn_up(&menu);
-					else if (btn & (1<<BTN_R))
-						btn_right(&menu);
-					else if (btn & (1<<BTN_D))
-						btn_down(&menu);
-					else if (btn & (1<<BTN_L))
-						btn_left(&menu);
-				}
+					uint16_t min = 0;
 
-				if (menu.page != NONE)
-				{
-					display_menu(&menu);
-					load_display();
+					if (page == NONE)
+						page = MAIN;
+					else if (btn & (1<<BTN_U))
+						btn_up(&page, &menu);
+					else if (btn & (1<<BTN_R))
+						btn_right(&page, &menu, &min);
+					else if (btn & (1<<BTN_D))
+						btn_down(&page, &menu);
+					else if (btn & (1<<BTN_L))
+						btn_left(&page, &menu, &min);
+
+					if (page == NONE)
+					{
+						cli();
+						if (!(flags & (1<<TIME_VALID)))
+							set_time(min);
+						sei();
+						flags |= (1<<UPDATE_TIME);
+					}
+					else
+						flags |= (1<<UPDATE_MENU);
 				}
 			}
-		} while (menu.page != NONE);
+
+			if (flags & (1<<UPDATE_MENU))
+			{
+				flags &= ~(1<<UPDATE_MENU);
+				display_menu(&page, &menu);
+				load_display();
+			}
+		} while (!(page == NONE || (page == INIT && flags & (1<<TIME_VALID))));
 		
 		cli();
-		if (flags & (1<<UPDATE_DISP))
+		if (flags & (1<<UPDATE_TIME))
 		{
-			flags &= ~(1<<UPDATE_DISP);
+			flags &= ~(1<<UPDATE_TIME);
 			uint24_t sec = seconds;
-			uint8_t sync = sync_dot;
+			uint8_t dot = sync_dot;
 			sei();
 
-			display_time(sec, sync);
+			display_time(sec, dot | dcf.state);
 			load_display();
 		}
 	}

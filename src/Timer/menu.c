@@ -36,9 +36,23 @@ static uint8_t dec(uint8_t dig, uint8_t max)
 	return dig;
 }
 
-void btn_up(struct menu *menu)
+static void write_minutes(enum page *page, uint8_t pos, uint16_t min)
 {
-	if (menu->page == MAIN)
+	if (*page == INIT)
+		*page = NONE;
+	else
+	{
+		if (*page == START)
+			write_lesson_start_end(pos, min);
+		else
+			write_lesson_end(pos, min);
+		*page = MAIN;
+	}
+}
+
+void btn_up(enum page *page, struct menu *menu)
+{
+	if (*page == MAIN)
 	{
 		if (is_last_lesson(menu->pos))
 		{
@@ -57,7 +71,7 @@ void btn_up(struct menu *menu)
 		}
 		else
 		{
-			menu->page = START;
+			*page = START;
 			menu->time_pos = 3;
 			minutes_to_digits(menu->dig, read_lesson_start(menu->pos));
 		}
@@ -72,39 +86,33 @@ void btn_up(struct menu *menu)
 			default: menu->dig[3] = inc(menu->dig[3], 2); break;
 		}
 
-		if (menu->dig[3] >= 2 && menu->dig[2] >= 4)
+		if (menu->dig[3] == 2 && menu->dig[2] >= 4)
 			menu->dig[2] = 0;
 	}
 }
 
-void btn_right(struct menu *menu)
+void btn_right(enum page *page, struct menu *menu, uint16_t *min)
 {
-	if (menu->page == MAIN)
+	if (*page == MAIN)
 	{
-		if (is_last_lesson(menu->pos))
-			menu->page = NONE;
-		else
-			(menu->pos)++;
+		(menu->pos)--;
+		if (menu->pos == 0xFF)
+			*page = NONE;
 	}
 	else
 	{
-		if (menu->time_pos)
-			(menu->time_pos)--;
-		else
+		(menu->time_pos)++;
+		if (menu->time_pos > 3)
 		{
-			uint16_t min = digits_to_minutes(menu->dig);
-			if (menu->page == START)
-				write_lesson_start_end(menu->pos, min);
-			else
-				write_lesson_end(menu->pos, min);
-			menu->page = MAIN;
+			*min = digits_to_minutes(menu->dig);
+			write_minutes(page, menu->pos, *min);
 		}
 	}
 }
 
-void btn_down(struct menu *menu)
+void btn_down(enum page *page, struct menu *menu)
 {
-	if (menu->page == MAIN)
+	if (*page == MAIN)
 	{
 		if (is_last_lesson(menu->pos))
 		{
@@ -119,7 +127,7 @@ void btn_down(struct menu *menu)
 		}
 		else
 		{
-			menu->page = END;
+			*page = END;
 			menu->time_pos = 3;
 			minutes_to_digits(menu->dig, read_lesson_end(menu->pos));
 		}
@@ -130,36 +138,36 @@ void btn_down(struct menu *menu)
 		{
 			case 0:  menu->dig[0] = dec(menu->dig[0], 9); break;
 			case 1:  menu->dig[1] = dec(menu->dig[1], 5); break;
-			case 2:  menu->dig[2] = dec(menu->dig[2], 9); break;
-			default: menu->dig[3] = dec(menu->dig[3], 2); break;
+			case 2:  menu->dig[2] = dec(menu->dig[2], menu->dig[3] == 2 ? 3 : 9); break;
+			default:
+				(menu->dig[3])--;
+				if (menu->dig[3] == 0xFF)
+				{
+					menu->dig[3] = 2;
+					if (menu->dig[2] >= 4)
+						menu->dig[2] = 0;
+				}
+				break;
 		}
-
-		if (menu->dig[3] >= 2 && menu->dig[2] >= 4)
-			menu->dig[2] = 0;
 	}
 }
 
-void btn_left(struct menu *menu)
+void btn_left(enum page *page, struct menu *menu, uint16_t *min)
 {
-	if (menu->page == MAIN)
+	if (*page == MAIN)
 	{
-		if (menu->pos == 0)
-			menu->page = NONE;
+		if (is_last_lesson(menu->pos))
+			*page = NONE;
 		else
-			(menu->pos)--;
+			(menu->pos)++;
 	}
 	else
 	{
-		if (menu->time_pos < 3)
-			(menu->time_pos)++;
-		else
+		(menu->time_pos)--;
+		if (menu->time_pos == 0xFF)
 		{
-			uint16_t min = digits_to_minutes(menu->dig);
-			if (menu->page == START)
-				write_lesson_start_end(menu->pos, min);
-			else
-				write_lesson_end(menu->pos, min);
-			menu->page = MAIN;
+			*min = digits_to_minutes(menu->dig);
+			write_minutes(page, menu->pos, *min);
 		}
 	}
 }

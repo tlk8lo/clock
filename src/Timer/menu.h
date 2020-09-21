@@ -6,19 +6,20 @@
 
 enum page
 {
-	NONE, MAIN, START, END, INIT
+	NONE, MAIN, START, END
 };
 
 struct menu
 {
+	enum page page;
+	uint8_t pos;
 	uint8_t time_pos;
 	uint8_t dig[4];
-	uint8_t pos;
 };
 
-extern void btn_up(enum page *page, struct menu *menu);
-extern void btn_right(enum page *page, struct menu *menu, uint16_t *min);
-extern void btn_down(enum page *page, struct menu *menu);
-extern void btn_left(enum page *page, struct menu *menu, uint16_t *min);
+extern void btn_up(struct menu *menu);
+extern void btn_right(struct menu *menu);
+extern void btn_down(struct menu *menu);
+extern void btn_left(struct menu *menu);
 
 #endif /* MENU_H */

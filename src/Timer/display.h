@@ -2,7 +2,6 @@
 #define DISPLAY_H
 
 #include <avr/io.h>
-#include <avr/pgmspace.h>
 #include "lessons.h"
 #include "menu.h"
 

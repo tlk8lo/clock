@@ -1,6 +1,6 @@
 #include "display.h"
 
-static const uint8_t font[] PROGMEM =
+static const __flash uint8_t font[] =
 {
 	CHAR_0,
 	CHAR_1,
@@ -25,7 +25,7 @@ static void send_byte(uint8_t data)
 
 static void send_num_dot(uint8_t data, uint8_t dot)
 {
-	send_byte(pgm_read_byte(font + data) | dot);
+	send_byte(font[data] | dot);
 }
 
 static void send_num(uint8_t data)
@@ -82,13 +82,18 @@ static void display_time_difference(uint24_t sec, uint8_t sync)
 			}
 		}
 	}
-	uint16_t minutes = nearest - min - 1;
+	uint16_t minutes = nearest - min;
+
+	if (bit)
+		minutes--;
+	else
+		bit = 60;
 
 	uint8_t m, h;
 	if (minutes < 60)
 	{
 		// Format: mm.ss
-		m = 59 - bit;
+		m = 60 - bit;
 		h = minutes;
 	}
 	else
@@ -110,11 +115,11 @@ static void display_time_difference(uint24_t sec, uint8_t sync)
 		send_byte(0);
 }
 
-static void display_time_no_sync()
+static void display_time_no_sync(uint8_t sync)
 {
 	send_byte(CHAR_MINUS);
 	send_byte(CHAR_MINUS);
-	send_byte(CHAR_MINUS);
+	send_byte(CHAR_MINUS | sync);
 	send_byte(CHAR_MINUS);
 }
 
@@ -123,7 +128,7 @@ void display_time(uint24_t sec, uint8_t sync)
 	if (TIMSK1 & (1<<OCIE1A))
 		display_time_difference(sec, sync);
 	else
-		display_time_no_sync();
+		display_time_no_sync(sync);
 }
 
 static void display_menu_pos(uint8_t pos)

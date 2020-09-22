@@ -81,16 +81,14 @@ void btn_right(struct menu *menu)
 {
 	if (menu->page == MAIN)
 	{
-		if (is_last_lesson(menu->pos))
+		(menu->pos)--;
+		if (menu->pos == 0xFF)
 			menu->page = NONE;
-		else
-			(menu->pos)++;
 	}
 	else
 	{
-		if (menu->time_pos)
-			(menu->time_pos)--;
-		else
+		(menu->time_pos)++;
+		if (menu->time_pos > 3)
 		{
 			uint16_t min = digits_to_minutes(menu->dig);
 			if (menu->page == START)
@@ -130,12 +128,17 @@ void btn_down(struct menu *menu)
 		{
 			case 0:  menu->dig[0] = dec(menu->dig[0], 9); break;
 			case 1:  menu->dig[1] = dec(menu->dig[1], 5); break;
-			case 2:  menu->dig[2] = dec(menu->dig[2], 9); break;
-			default: menu->dig[3] = dec(menu->dig[3], 2); break;
+			case 2:  menu->dig[2] = dec(menu->dig[2], menu->dig[3] == 2 ? 3 : 9); break;
+			default:
+				(menu->dig[3])--;
+				if (menu->dig[3] == 0xFF)
+				{
+					menu->dig[3] = 2;
+					if (menu->dig[2] >= 4)
+						menu->dig[2] = 0;
+				}
+				break;
 		}
-
-		if (menu->dig[3] >= 2 && menu->dig[2] >= 4)
-			menu->dig[2] = 0;
 	}
 }
 
@@ -143,16 +146,15 @@ void btn_left(struct menu *menu)
 {
 	if (menu->page == MAIN)
 	{
-		if (menu->pos == 0)
+		if (is_last_lesson(menu->pos))
 			menu->page = NONE;
 		else
-			(menu->pos)--;
+			(menu->pos)++;
 	}
 	else
 	{
-		if (menu->time_pos < 3)
-			(menu->time_pos)++;
-		else
+		(menu->time_pos)--;
+		if (menu->time_pos == 0xFF)
 		{
 			uint16_t min = digits_to_minutes(menu->dig);
 			if (menu->page == START)

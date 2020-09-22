@@ -88,7 +88,7 @@
 #define DCF_RES_VAL	10
 
 #define UPDATE_DISP	0
-#define SYNC		1
+#define DCF_SYNC	1
 //static volatile uint8_t flags;
 #define flags		GPIOR0
 
@@ -123,18 +123,17 @@ static void check_dcf(struct dcf *dcf)
 			uint24_t s = dcf_parse(data);
 			
 			cli();
-			uint16_t cnt = TCNT1;
 			GTCCR = (1<<PSR10);
-			if (cnt >= SEC_OCR_VAL - (SEC_RES_VAL - 1))
-				OCR1A = cnt + (SEC_RES_VAL - 1) - SEC_OCR_VAL;
+			uint16_t tcnt = TCNT1;
+			if (tcnt >= SEC_OCR_VAL - (SEC_RES_VAL - 1))
+				OCR1A = tcnt + (SEC_RES_VAL - 1) - SEC_OCR_VAL;
 			else
-				OCR1A = cnt + (SEC_RES_VAL - 1);
+				OCR1A = tcnt + (SEC_RES_VAL - 1);
 			TIFR1 = (1<<OCF1A);
+			TIMSK1 |= (1<<OCIE1A);
 
 			last_sync = s;
-			sync_dot = CHAR_DOT;
-			flags |= (1<<SYNC);
-			TIMSK1 = (1<<OCIE1A);
+			flags |= (1<<DCF_SYNC);
 		}
 
 		dcf->cnt = 0;
@@ -178,6 +177,8 @@ static void check_dcf(struct dcf *dcf)
 		}
 		
 		dcf->state = new_state;
+		if (!(sync_dot & CHAR_DOT))
+			flags |= (1<<UPDATE_DISP);
 	}
 }
 
@@ -187,11 +188,11 @@ static void check_pin_change()
 	if (GIFR & (1<<PCIF0))
 	{
 		GIFR = (1<<PCIF0);
-		uint16_t cnt = TCNT1;
-		if (cnt >= SEC_OCR_VAL - (BTN_DEB_VAL - 1))
-			OCR1B = cnt + (BTN_DEB_VAL - 1) - SEC_OCR_VAL;
+		uint16_t tcnt = TCNT1;
+		if (tcnt >= SEC_OCR_VAL - (BTN_DEB_VAL - 1))
+			OCR1B = tcnt + (BTN_DEB_VAL - 1) - SEC_OCR_VAL;
 		else
-			OCR1B = cnt + (BTN_DEB_VAL - 1);
+			OCR1B = tcnt + (BTN_DEB_VAL - 1);
 		TIFR1 = (1<<OCF1B);
 	}
 	sei();
@@ -217,13 +218,14 @@ ISR(TIM1_COMPA_vect)
 		s = 0;
 
 	uint24_t l = last_sync;
-	if (flags & (1<<SYNC))
+	if (flags & (1<<DCF_SYNC))
 	{
-		flags &= ~(1<<SYNC);
+		flags &= ~(1<<DCF_SYNC);
+		sync_dot |= CHAR_DOT;
 		s = l;
 	}
 	else if (s == l)
-		sync_dot = 0;
+		sync_dot &= ~CHAR_DOT;
 	
 	seconds = s;
 	flags |= (1<<UPDATE_DISP);
@@ -258,13 +260,13 @@ int main(void)
 
 	uint8_t old = BTN_PIN;
 	struct dcf dcf = { old & (1<<DCF_BIT) };
-	
+
 	// Main loop
 	while (1)
 	{
 		sei();
 		struct menu menu = { 0 };
-		
+
 		do
 		{
 			check_dcf(&dcf);
@@ -275,7 +277,7 @@ int main(void)
 				uint8_t new = BTN_PIN;
 				uint8_t btn = old & ~new;
 				old = new;
-				
+
 				if (btn & BTN_MASK)
 				{
 					if (menu.page == NONE)
@@ -291,12 +293,12 @@ int main(void)
 						btn_down(&menu);
 					else if (btn & (1<<BTN_L))
 						btn_left(&menu);
-				}
 
-				if (menu.page != NONE)
-				{
-					display_menu(&menu);
-					load_display();
+					if (menu.page != NONE)
+					{
+						display_menu(&menu);
+						load_display();
+					}
 				}
 			}
 		} while (menu.page != NONE);
@@ -309,7 +311,7 @@ int main(void)
 			uint8_t sync = sync_dot;
 			sei();
 
-			display_time(sec, sync);
+			display_time(sec, sync | dcf.state);
 			load_display();
 		}
 	}
